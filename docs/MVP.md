@@ -47,7 +47,7 @@ private notes.
 
 | Phase | Deliverable | Done when |
 | --- | --- | --- |
-| 4. Synthetic release gate | Clean package install, CI, private route canary on fictional data, and frozen evaluation sets. | **In progress.** Linux CI passed on Python 3.11/3.12; live fictional canaries, candidate recall, mocked rerank behavior, and primary plus holdout live alignment are recorded. The holdout improved from 10/12 to 12/12 exact and acceptable after rubric clarification. macOS 3.12 and Windows 3.12 jobs are configured but have not run. |
+| 4. Synthetic release gate | Clean package install, CI, private route canary on fictional data, and frozen evaluation sets. | **Delivered.** Ubuntu Python 3.11/3.12, macOS 3.12, and Windows 3.12 CI passed. Live fictional canaries, candidate recall, mocked rerank behavior, and primary plus holdout live alignment are recorded. The holdout improved from 10/12 to 12/12 exact and acceptable after rubric clarification. |
 | 5. Private pilot | Opt in 300 to 500 note sample with source permissions, baseline searches, human review time, and measured retrieval quality. | Owner has reviewed data handling and pilot scope; no automatic source edits; before/after metrics include misses and wrong links. |
 | 6. Broader second brain | Pre tags, buckets, clusters, duplicate review, cross links, portable adapters, and optional reviewed writeback. | Each action has an explainable preview, reversible provenance, a quality benchmark, and a documented authority boundary. |
 | 7. Public distribution | Public standalone repository, versioned package/skill, contribution guidance and repeatable releases. | **In progress.** The repository and Git install are public. A tag, GitHub release, package-registry release and release automation remain. |

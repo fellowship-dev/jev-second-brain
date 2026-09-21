@@ -12,7 +12,7 @@ Verified on macOS, 2026-09-20 (America/Santiago):
 | Check | Result |
 | --- | --- |
 | Synthetic tests | `PYTHONPATH=src python3 -m unittest discover -s tests -q`: 45 passed at the original MVP commit. |
-| Integrated tests | The final launch-preparation tree passed 70 tests locally on 2026-09-21, including candidate, rerank, live-alignment, and stale-index coverage. Benchmark result claims remain separate below. |
+| Integrated tests | The final launch-preparation tree passed 71 tests locally on 2026-09-21, including candidate, rerank, live-alignment, stale-index, and cross-platform fingerprint coverage. Benchmark result claims remain separate below. |
 | Skill provenance | `python3 scripts/check_skill_sync.py --source-repo ../jev-pattern-library-draft`: matched the recorded source and copy hashes. |
 | Package build | The final tree built `jev_second_brain-0.1.0-py3-none-any.whl`. |
 | Clean install | That wheel installed into a clean temporary virtual environment; the installed CLI completed `init`, `index`, `search`, and `suggest`. |
@@ -25,11 +25,12 @@ the later candidate-selection changes.
 
 ## Remote CI
 
-[GitHub Actions run 35558779025](https://github.com/fellowship-dev/jev-second-brain/actions/runs/35558779025)
-passed on 2026-09-21. Both Ubuntu Python 3.11 and 3.12 jobs completed package
-install, unit tests, skill provenance validation, and the installed CLI smoke
-journey. The workflow now also declares macOS 3.12 and Windows 3.12 jobs, but
-that expanded matrix has not run. Cross-platform verification remains pending.
+[GitHub Actions run 35560132227](https://github.com/fellowship-dev/jev-second-brain/actions/runs/35560132227)
+passed on 2026-09-21. Ubuntu Python 3.11 and 3.12, macOS Python 3.12, and
+Windows Python 3.12 all completed package install, 71 unit tests, skill
+provenance validation, and the installed CLI smoke journey. The Windows run
+first exposed newline-dependent benchmark and provenance hashes; the recorded
+passing run includes their LF/CRLF normalization regressions.
 
 ## Deterministic benchmark receipts
 
@@ -119,7 +120,6 @@ remain available without a key.
 
 ## Remaining evidence gates
 
-- Add macOS and Windows CI before claiming cross-platform verification.
 - Run a separately scoped, opt-in private pilot only after its data handling
   and review plan are approved.
 - Tag and publish the exact tested commit before claiming a registry release.
