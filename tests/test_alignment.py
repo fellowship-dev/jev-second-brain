@@ -136,6 +136,23 @@ class AlignmentTest(unittest.TestCase):
         self.assertEqual(low_confidence.judgments[0].model_choice, "none")
         self.assertEqual(low_confidence.judgments[0].relation, "unsure")
 
+    def test_revision_and_contradiction_proposals_keep_direction(self):
+        self.put("a.md", "# Aurora status\nThis updates [[b]].")
+        self.put("b.md", "# Aurora status\nEarlier status.")
+        source = self.indexed()
+        target = {note.path: note.id for note in list_notes(self.db)}["b.md"]
+        revised = suggest_for_note(self.db, source, provider=FakeProvider("revises"),
+                                   cache_path=self.cache, evaluate=True)
+        self.assertEqual(revised.proposals[0].relation, "revises")
+        self.assertEqual((revised.proposals[0].source_id, revised.proposals[0].target_id),
+                         (source, target))
+        reverse = suggest_for_note(self.db, target, provider=FakeProvider("revises"),
+                                   cache_path=self.cache, evaluate=True)
+        self.assertNotEqual(revised.proposals[0].proposal_id, reverse.proposals[0].proposal_id)
+        contradicted = suggest_for_note(self.db, source, provider=FakeProvider("contradicts"),
+                                        cache_path=self.root / "contradiction.sqlite", evaluate=True)
+        self.assertEqual(contradicted.proposals[0].relation, "contradicts")
+
     def test_failed_provider_call_is_not_cached_and_sources_unchanged(self):
         self.put("a.md", "# Aurora launch\nSee [[b]].")
         self.put("b.md", "# Aurora reference\nDetails.")
