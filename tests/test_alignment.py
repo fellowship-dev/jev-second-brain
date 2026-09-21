@@ -5,7 +5,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from jev_second_brain.alignment import MAX_CANDIDATES, suggest_for_note
+from jev_second_brain.alignment import MAX_CANDIDATES, RUBRIC, suggest_for_note
 from jev_second_brain.index import list_notes, scan_and_index
 from jev_second_brain.provider import EvaluationResult, MODEL
 from decimal import Decimal
@@ -19,6 +19,7 @@ class FakeProvider:
 
     def __post_init__(self):
         self.calls: list[tuple[dict, dict, bool]] = []
+        self.private_route_verified = True
 
     def evaluate(self, state, questions, *, private=True):
         self.calls.append((state, questions, private))
@@ -54,6 +55,18 @@ class AlignmentTest(unittest.TestCase):
     def indexed(self, path="a.md") -> str:
         scan_and_index(self.vault, self.db)
         return {note.path: note.id for note in list_notes(self.db)}[path]
+
+    def test_rubric_distinguishes_substitutable_from_complementary_notes(self):
+        question = RUBRIC["relation"]
+        instructions = question["instructions"]
+        duplicate = question["criteria"]["duplicate"]
+        related = question["criteria"]["related"]
+        self.assertIn("functionally substitutable", instructions)
+        self.assertIn("lose no useful", duplicate)
+        self.assertIn("not substitutable", related)
+        self.assertIn("operational detail", related)
+        self.assertIn("when TARGET explicitly updates SOURCE", instructions)
+        self.assertIn("conflicting drafts", question["criteria"]["unsure"])
 
     def test_local_shortlist_has_no_provider_calls_or_cache_write(self):
         self.put("a.md", "# Aurora launch\nSee [[b]].")
@@ -193,6 +206,34 @@ class AlignmentTest(unittest.TestCase):
             suggest_for_note(self.db, source, evaluate=True)
         with self.assertRaises(ValueError):
             suggest_for_note(self.db, source, k=MAX_CANDIDATES + 1)
+
+    def test_private_mode_rejects_unverified_custom_provider_before_source_leaves(self):
+        self.put("a.md", "# Aurora launch\nSee [[b]].")
+        self.put("b.md", "# Aurora reference\nDetails.")
+        source = self.indexed()
+
+        class UnverifiedProvider:
+            calls = 0
+
+            def evaluate(self, state, questions, *, private=True):
+                self.calls += 1
+                raise AssertionError("private source must not leave")
+
+        provider = UnverifiedProvider()
+        with self.assertRaisesRegex(Exception, "verified private route"):
+            suggest_for_note(self.db, source, provider=provider, cache_path=self.cache, evaluate=True)
+        self.assertEqual(provider.calls, 0)
+
+    def test_changed_source_requires_reindex_before_evaluation(self):
+        self.put("a.md", "# Aurora launch\nSee [[b]].")
+        self.put("b.md", "# Aurora reference\nOriginal details.")
+        source = self.indexed()
+        self.put("b.md", "# Aurora reference\nChanged after indexing.")
+        provider = FakeProvider("related")
+
+        with self.assertRaisesRegex(ValueError, "run index and retry"):
+            suggest_for_note(self.db, source, provider=provider, cache_path=self.cache, evaluate=True)
+        self.assertEqual(provider.calls, [])
 
 
 if __name__ == "__main__":

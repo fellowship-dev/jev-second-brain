@@ -1,0 +1,52 @@
+name: Feature request
+description: Propose a bounded improvement with a verification path
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What task is hard today, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Desired outcome
+      description: Describe observable behavior rather than an implementation alone.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Example
+      description: Use fictional input and show the expected source-linked output.
+    validations:
+      required: true
+  - type: dropdown
+    id: data
+    attributes:
+      label: Data boundary
+      options:
+        - Fully local
+        - Optional explicit provider call
+        - Source Markdown write or migration
+        - Unsure
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: How should recall, wrong results, source preservation, or provider use be checked?
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: This proposal includes no private notes, credentials, or provider responses.
+          required: true

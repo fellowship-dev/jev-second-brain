@@ -6,10 +6,20 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from jev_second_brain.cli import main
+from jev_second_brain.cli import _provider_usage, main
+from jev_second_brain.policy import BudgetLimits
+from jev_second_brain.provider import VercelJevProvider
 
 
 class CliSmokeTest(unittest.TestCase):
+    def test_provider_usage_includes_every_reserved_attempt(self):
+        provider = VercelJevProvider(limits=BudgetLimits(max_requests=3), env={})
+        provider.budget.reserve_attempt(120)
+        usage = _provider_usage(provider)
+        self.assertEqual(usage["requests"], 1)
+        self.assertEqual(usage["request_bytes"], 120)
+        self.assertEqual(usage["cost_usd"], "0")
+
     def test_help(self):
         out = io.StringIO()
         with contextlib.redirect_stdout(out), self.assertRaises(SystemExit) as raised:

@@ -26,6 +26,18 @@ def _emit(payload: dict, *, json_output: bool) -> None:
         print(json.dumps(payload, indent=2, sort_keys=True))
 
 
+def _provider_usage(provider: VercelJevProvider) -> dict[str, int | str]:
+    """Report the whole provider session, including canary and retries."""
+    budget = provider.budget
+    return {
+        "requests": budget.requests,
+        "request_bytes": budget.request_bytes,
+        "input_tokens": budget.input_tokens,
+        "output_tokens": budget.output_tokens,
+        "cost_usd": str(budget.cost_usd),
+    }
+
+
 def _state_command(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--state", required=True, type=Path, help="Project state directory created by init")
     parser.add_argument("--json", action="store_true", help="Emit machine-readable JSON")
@@ -121,7 +133,7 @@ def main(argv: list[str] | None = None) -> int:
                 evaluate=True,
                 cache_path=config.state_dir / "rerank-cache.sqlite",
             )
-            _emit(asdict(result), json_output=args.json)
+            _emit({**asdict(result), "provider_usage": _provider_usage(provider)}, json_output=args.json)
         else:
             hits = search(config.db_path, args.query, args.limit)
             _emit(
@@ -155,6 +167,8 @@ def main(argv: list[str] | None = None) -> int:
             print(f"secondbrain: {exc}", file=sys.stderr)
             return 2
         payload = asdict(result)
+        if provider is not None:
+            payload["provider_usage"] = _provider_usage(provider)
         reviews = latest_reviews(config.state_dir / "reviews.jsonl")
         for proposal in payload["proposals"]:
             proposal["review"] = reviews.get(proposal["proposal_id"])

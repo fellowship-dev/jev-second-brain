@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "ranking_cases": [
+    {
+      "id": "direct_support_beats_keyword_density",
+      "query": "telescope mirror",
+      "expected_status": "supported",
+      "notes": [
+        {
+          "path": "direct.md",
+          "content": "# Telescope specification\nThe blue telescope uses a 200 mm mirror for observing stars.\n",
+          "choice": "supports",
+          "probabilities": {"supports": 0.91, "related": 0.07, "irrelevant": 0.02}
+        },
+        {
+          "path": "related.md",
+          "content": "# Telescope purchase\nWe bought a telescope yesterday and discussed its mirror budget.\n",
+          "choice": "related",
+          "probabilities": {"supports": 0.15, "related": 0.75, "irrelevant": 0.10}
+        },
+        {
+          "path": "irrelevant.md",
+          "content": "# Telescope Cafe\nTelescope mirror telescope mirror telescope mirror is the cafe's trivia night theme.\n",
+          "choice": "irrelevant",
+          "probabilities": {"supports": 0.03, "related": 0.07, "irrelevant": 0.90}
+        }
+      ]
+    },
+    {
+      "id": "answer_owner_beats_topic_only_notes",
+      "query": "Aurora onboarding owner",
+      "expected_status": "supported",
+      "notes": [
+        {
+          "path": "owner.md",
+          "content": "# Aurora onboarding\nLina owns the Aurora onboarding checklist.\n",
+          "choice": "supports",
+          "probabilities": {"supports": 0.94, "related": 0.04, "irrelevant": 0.02}
+        },
+        {
+          "path": "roadmap.md",
+          "content": "# Aurora roadmap\nThe Aurora launch includes onboarding work this quarter.\n",
+          "choice": "related",
+          "probabilities": {"supports": 0.12, "related": 0.81, "irrelevant": 0.07}
+        },
+        {
+          "path": "namesake.md",
+          "content": "# Aurora Owner Cafe\nAurora onboarding owner Aurora onboarding owner are unrelated search tags.\n",
+          "choice": "irrelevant",
+          "probabilities": {"supports": 0.01, "related": 0.04, "irrelevant": 0.95}
+        }
+      ]
+    },
+    {
+      "id": "plurality_below_support_threshold",
+      "query": "Orchid deadline",
+      "expected_status": "abstain",
+      "notes": [
+        {
+          "path": "uncertain.md",
+          "content": "# Orchid\nThe Orchid deadline may be near the end of June, pending confirmation.\n",
+          "choice": "supports",
+          "probabilities": {"supports": 0.55, "related": 0.40, "irrelevant": 0.05}
+        }
+      ]
+    },
+    {
+      "id": "topic_only_abstains",
+      "query": "Comet launch date",
+      "expected_status": "abstain",
+      "notes": [
+        {
+          "path": "overview.md",
+          "content": "# Comet\nThe Comet launch date is being discussed by the launch team.\n",
+          "choice": "related",
+          "probabilities": {"supports": 0.20, "related": 0.72, "irrelevant": 0.08}
+        },
+        {
+          "path": "wordplay.md",
+          "content": "# Wordplay\nComet launch date is the name of a board-game card.\n",
+          "choice": "irrelevant",
+          "probabilities": {"supports": 0.02, "related": 0.04, "irrelevant": 0.94}
+        }
+      ]
+    }
+  ]
+}

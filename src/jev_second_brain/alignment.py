@@ -17,7 +17,8 @@ import sqlite3
 from typing import Any
 
 from .candidates import CandidateSet, candidates_for_note
-from .index import Note, _connect, get_note
+from .index import Note, _connect, get_note, require_fresh_source
+from .policy import ensure_private_provider
 from .provider import MODEL, EvaluationResult, ProviderError, validate_answers
 from .reviews import proposal_id
 
@@ -32,15 +33,38 @@ RUBRIC: dict[str, Any] = {
         "instructions": (
             "Judge the directed relationship from SOURCE to TARGET using only the "
             "shown note text. Prefer unsure if either excerpt lacks the evidence. "
-            "Do not infer a link from shared generic words or fabricate chronology."
+            "Do not infer a link from shared generic words or fabricate chronology. "
+            "Choose duplicate only when the notes are functionally substitutable: "
+            "consolidating either into the other would lose no useful fact, scope, "
+            "evidence, decision, procedure, or purpose. If both notes should remain "
+            "because either contributes distinct operational detail or serves a "
+            "complementary purpose, choose related instead. Treat revision direction "
+            "literally: revises applies only when SOURCE updates TARGET; when TARGET "
+            "explicitly updates SOURCE, choose related because the reverse relation is "
+            "not available. Use contradicts only for incompatible claims presented as "
+            "current or authoritative. If conflicting drafts lack chronology or authority, "
+            "choose unsure."
         ),
         "criteria": {
-            "duplicate": "Same substantive claims or information; a human might consolidate them.",
-            "related": "Distinct but meaningfully connected information worth a cross-link.",
-            "revises": "SOURCE explicitly updates, corrects, or supersedes TARGET.",
-            "contradicts": "SOURCE and TARGET make incompatible substantive claims.",
+            "duplicate": (
+                "Functionally substitutable notes with the same material information; "
+                "consolidation would lose no useful detail or purpose."
+            ),
+            "related": (
+                "Meaningfully connected notes that are not substitutable and are worth "
+                "retaining separately because one adds facts, operational detail, "
+                "evidence, rationale, scope, or a complementary purpose."
+            ),
+            "revises": "SOURCE explicitly updates, corrects, or supersedes TARGET; direction matters.",
+            "contradicts": (
+                "SOURCE and TARGET make incompatible substantive claims that are both "
+                "presented as current or authoritative, without an explicit revision."
+            ),
             "none": "No useful semantic relation is supported by the shown text.",
-            "unsure": "Evidence is insufficient or ambiguous, including truncated key context.",
+            "unsure": (
+                "Evidence is insufficient or ambiguous, including truncated key context, "
+                "unknown chronology, or conflicting drafts with no authority signal."
+            ),
         },
     }
 }
@@ -224,6 +248,8 @@ def suggest_for_note(
     if source is None:
         raise ValueError(f"Unknown active note id: {note_id}")
     vault = _vault_for_index(db_path)
+    if evaluate:
+        require_fresh_source(vault, source)
     state_path = Path(cache_path).resolve() if cache_path is not None else db_path.parent / "alignment-cache.sqlite"
     if state_path.is_relative_to(vault):
         raise ValueError("Put the alignment cache outside the source vault")
@@ -250,12 +276,15 @@ def suggest_for_note(
                 # An index mutation during this read should fail rather than
                 # silently produce an incomplete coverage receipt.
                 raise ValueError("Candidate disappeared during alignment; rescan and retry")
+            require_fresh_source(vault, target)
             key = _cache_key(source, target, private=private)
             outcome = _cached(cache, key)
             from_cache = outcome is not None
             if from_cache:
                 cache_hits += 1
             else:
+                if private:
+                    ensure_private_provider(provider)
                 result = provider.evaluate(_pair_state(source, target), RUBRIC, private=private)
                 provider_calls += 1
                 outcome = _outcome(result)

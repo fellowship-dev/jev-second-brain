@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "live-synthetic-alignment",
+  "cases": [
+    {
+      "id": "duplicate-checksum-procedure",
+      "expected": "duplicate",
+      "acceptable": ["duplicate"],
+      "source": {
+        "title": "Archive verification",
+        "text": "Compute a SHA-256 digest for every archive before transfer, then compare the digest after transfer."
+      },
+      "target": {
+        "title": "Archive verification copy",
+        "text": "Compute a SHA-256 digest for every archive before transfer, then compare the digest after transfer."
+      }
+    },
+    {
+      "id": "related-paraphrase-rollout",
+      "expected": "related",
+      "acceptable": ["related"],
+      "source": {
+        "title": "Falcon readiness conversation",
+        "text": "Release to a small canary group, inspect telemetry, and expand only after error indicators stay quiet."
+      },
+      "target": {
+        "title": "Progressive delivery",
+        "text": "A staged rollout starts with a limited audience and grows after monitoring confirms healthy behavior."
+      }
+    },
+    {
+      "id": "revision-retention-window",
+      "expected": "revises",
+      "acceptable": ["revises", "related"],
+      "source": {
+        "title": "Current receipt retention decision",
+        "text": "This decision supersedes the prior ninety-day policy. Synthetic receipts now expire after thirty days."
+      },
+      "target": {
+        "title": "Previous receipt retention decision",
+        "text": "Synthetic receipts must be retained for ninety days before expiry."
+      }
+    },
+    {
+      "id": "contradiction-offline-operation",
+      "expected": "contradicts",
+      "acceptable": ["contradicts"],
+      "source": {
+        "title": "Offline test result",
+        "text": "The fictional client completed every tested operation without a network connection."
+      },
+      "target": {
+        "title": "Connectivity requirement",
+        "text": "The fictional client requires a network connection for every operation."
+      }
+    },
+    {
+      "id": "none-shared-launch-words",
+      "expected": "none",
+      "acceptable": ["none"],
+      "source": {
+        "title": "Orchid launch checklist",
+        "text": "Confirm mobile onboarding and crash reporting before the fictional application release."
+      },
+      "target": {
+        "title": "Kayak launch checklist",
+        "text": "Pack a paddle and life jacket before putting the kayak into the lake."
+      }
+    },
+    {
+      "id": "ambiguous-pronoun-reference",
+      "expected": "unsure",
+      "acceptable": ["unsure"],
+      "source": {
+        "title": "Follow-up fragment",
+        "text": "It should replace that approach after the next review."
+      },
+      "target": {
+        "title": "Earlier fragment",
+        "text": "The team discussed one option, but the selected approach was not recorded here."
+      }
+    }
+  ]
+}

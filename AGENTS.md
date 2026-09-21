@@ -11,4 +11,4 @@ Keep local search usable when Jev is unavailable.
 
 Run `python3 -m unittest discover -s tests -v` for focused verification. Before
 committing, stage only task-owned paths and inspect the staged diff. Public
-publication remains a separate owner decision.
+releases and package-registry publication remain separate owner decisions.

@@ -51,6 +51,29 @@ class CandidateTest(unittest.TestCase):
         wider = candidates_for_note(self.db, notes["a.md"].id, k=3)
         self.assertIn("title_overlap", next(c for c in wider.candidates if c.path == "c.md").reasons)
 
+    def test_substantial_body_overlap_beats_shared_title_words(self):
+        self.put(
+            "source.md",
+            "# Falcon readiness conversation\n"
+            "Release a small canary group, inspect telemetry, and expand only after error indicators stay quiet.",
+        )
+        self.put(
+            "related.md",
+            "# Progressive rollout method\n"
+            "Begin with a small canary group. Inspect telemetry before expanding while error indicators remain quiet.",
+        )
+        self.put(
+            "unrelated.md",
+            "# Falcon garden conversation\n"
+            "A falcon visited the garden while neighbors discussed quiet weekend plans.",
+        )
+        scan_and_index(self.vault, self.db)
+        notes = {note.path: note for note in list_notes(self.db)}
+        batch = candidates_for_note(self.db, notes["source.md"].id, k=3)
+        self.assertEqual(batch.candidates[0].path, "related.md")
+        self.assertIn("lexical_overlap", batch.candidates[0].reasons)
+        self.assertNotIn("unrelated.md", [candidate.path for candidate in batch.candidates])
+
     def test_missing_id_and_invalid_cap(self):
         self.put("a.md", "# A")
         scan_and_index(self.vault, self.db)

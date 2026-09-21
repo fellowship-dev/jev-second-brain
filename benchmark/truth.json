@@ -1,0 +1,54 @@
+{
+  "benchmark_version": 1,
+  "default_k": 3,
+  "cases": [
+    {
+      "id": "explicit-link",
+      "source": "queries/explicit-link.md",
+      "expected": [
+        {"path": "references/orbit-checklist.md", "relationship": "explicit_link", "direction": "outgoing"}
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "different-title-paraphrase",
+      "source": "queries/paraphrase.md",
+      "expected": [
+        {"path": "references/staged-delivery.md", "relationship": "paraphrase", "direction": "symmetric"}
+      ],
+      "forbidden": ["distractors/shared-word-unrelated.md"]
+    },
+    {
+      "id": "identical-copy",
+      "source": "queries/duplicate.md",
+      "expected": [
+        {"path": "references/duplicate.md", "relationship": "duplicate", "direction": "symmetric"}
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "new-revises-old",
+      "source": "queries/revision.md",
+      "expected": [
+        {"path": "references/old-policy.md", "relationship": "supersedes", "direction": "source_to_target"}
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "claim-contradicts-baseline",
+      "source": "queries/contradiction.md",
+      "expected": [
+        {"path": "references/baseline-claim.md", "relationship": "contradicts", "direction": "source_to_target"}
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "semantic-outside-shortlist",
+      "source": "queries/outside-shortlist.md",
+      "expected": [
+        {"path": "references/outside-shortlist.md", "relationship": "outside_shortlist", "direction": "symmetric"}
+      ],
+      "forbidden": []
+    }
+  ]
+}

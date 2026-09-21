@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "live-synthetic-alignment-holdout",
+  "cases": [
+    {
+      "id": "boundary-duplicate-incident-escalation",
+      "expected": "duplicate",
+      "acceptable": ["duplicate"],
+      "source": {
+        "title": "Peregrine incident escalation",
+        "text": "For a fictional Peregrine severity-one incident, page the duty lead immediately and open the response room."
+      },
+      "target": {
+        "title": "Peregrine critical incident steps",
+        "text": "Immediately alert the on-call lead and create the response room when fictional Peregrine has a severity-one incident."
+      }
+    },
+    {
+      "id": "boundary-related-lemon-tart-components",
+      "expected": "related",
+      "acceptable": ["related"],
+      "source": {
+        "title": "Lemon tart filling",
+        "text": "Whisk the fictional lemon custard over low heat until it coats a spoon, then cool it before filling."
+      },
+      "target": {
+        "title": "Lemon tart pastry shell",
+        "text": "Blind-bake the fictional tart shell with weights, remove them, and bake again until the pastry is golden."
+      }
+    },
+    {
+      "id": "boundary-duplicate-invoice-approval",
+      "expected": "duplicate",
+      "acceptable": ["duplicate"],
+      "source": {
+        "title": "Nimbus invoice approval",
+        "text": "Fictional Nimbus invoices above 800 credits require approval from the finance lead."
+      },
+      "target": {
+        "title": "Nimbus payment control",
+        "text": "The finance lead must approve any fictional Nimbus invoice whose value exceeds 800 credits."
+      }
+    },
+    {
+      "id": "boundary-related-orchid-care-and-observation",
+      "expected": "related",
+      "acceptable": ["related"],
+      "source": {
+        "title": "Silver orchid care",
+        "text": "Water the fictional silver orchid when the top two centimeters of soil are dry and keep it out of direct sun."
+      },
+      "target": {
+        "title": "Silver orchid growth log",
+        "text": "The fictional silver orchid produced two new leaves in May after its pot was moved to the east window."
+      }
+    },
+    {
+      "id": "revision-source-supersedes-target",
+      "expected": "revises",
+      "acceptable": ["revises"],
+      "source": {
+        "title": "Current Vega upload limit",
+        "text": "This decision replaces the earlier Vega limit: fictional uploads are now capped at 10 megabytes."
+      },
+      "target": {
+        "title": "Earlier Vega upload limit",
+        "text": "Fictional Vega uploads are capped at 20 megabytes."
+      }
+    },
+    {
+      "id": "revision-direction-target-supersedes-source",
+      "expected": "related",
+      "acceptable": ["related"],
+      "source": {
+        "title": "Earlier Atlas pilot plan",
+        "text": "The fictional Atlas pilot will begin in four regions."
+      },
+      "target": {
+        "title": "Current Atlas pilot plan",
+        "text": "This plan supersedes the four-region proposal; the fictional Atlas pilot will begin in two regions."
+      }
+    },
+    {
+      "id": "contradiction-encryption-default",
+      "expected": "contradicts",
+      "acceptable": ["contradicts"],
+      "source": {
+        "title": "Quartz storage result",
+        "text": "Every fictional Quartz export was encrypted at rest by default in the verified build."
+      },
+      "target": {
+        "title": "Quartz storage limitation",
+        "text": "Fictional Quartz exports are never encrypted at rest unless an operator enables encryption manually."
+      }
+    },
+    {
+      "id": "contradiction-weekend-support",
+      "expected": "contradicts",
+      "acceptable": ["contradicts"],
+      "source": {
+        "title": "Mica support hours",
+        "text": "The fictional Mica support desk is closed on Saturdays and Sundays."
+      },
+      "target": {
+        "title": "Mica weekend coverage",
+        "text": "The fictional Mica support desk is staffed every Saturday and Sunday."
+      }
+    },
+    {
+      "id": "none-shared-python-word",
+      "expected": "none",
+      "acceptable": ["none"],
+      "source": {
+        "title": "Python retry helper",
+        "text": "The fictional Python service retries a failed request twice before returning an error."
+      },
+      "target": {
+        "title": "Python habitat card",
+        "text": "The fictional python habitat card records humidity and basking temperature for a reptile enclosure."
+      }
+    },
+    {
+      "id": "none-shared-mercury-word",
+      "expected": "none",
+      "acceptable": ["none"],
+      "source": {
+        "title": "Mercury release train",
+        "text": "The fictional Mercury release train departs after the integration suite passes."
+      },
+      "target": {
+        "title": "Mercury astronomy note",
+        "text": "Mercury completes an orbit around the Sun faster than any other planet."
+      }
+    },
+    {
+      "id": "unsure-missing-referent",
+      "expected": "unsure",
+      "acceptable": ["unsure"],
+      "source": {
+        "title": "Decision follow-up",
+        "text": "Use the second option next time because it solved the issue."
+      },
+      "target": {
+        "title": "Options fragment",
+        "text": "Two alternatives were reviewed, but their names and outcomes are not recorded in this note."
+      }
+    },
+    {
+      "id": "unsure-unclear-chronology",
+      "expected": "unsure",
+      "acceptable": ["unsure"],
+      "source": {
+        "title": "Cobalt threshold note",
+        "text": "The fictional Cobalt threshold is 45, according to an undated draft."
+      },
+      "target": {
+        "title": "Other Cobalt threshold note",
+        "text": "The fictional Cobalt threshold is 60, according to another undated draft."
+      }
+    }
+  ]
+}

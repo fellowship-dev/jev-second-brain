@@ -104,6 +104,18 @@ def require_private_route(verified: bool) -> None:
         raise PolicyError("private evaluation requires a verified synthetic ZDR route")
 
 
+def ensure_private_provider(provider: Any) -> None:
+    """Verify an adapter capability before passing it private application state."""
+    verified = getattr(provider, "private_route_verified", None)
+    if verified is True:
+        return
+    verifier = getattr(provider, "verify_private_route", None)
+    if verified is False and callable(verifier):
+        verifier()
+    if getattr(provider, "private_route_verified", None) is not True:
+        raise PolicyError("provider has no verified private route")
+
+
 def validate_gateway_route(provider_metadata: Any, *, require_zdr_evidence: bool = False) -> dict[str, Any]:
     """Require TypeSafe routing and, for the canary, explicit ZDR evidence.
 

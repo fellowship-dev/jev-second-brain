@@ -16,6 +16,8 @@ _STOP = frozenset({
     "a", "an", "and", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to",
     "with", "notes", "note", "readme", "index", "project", "meeting", "update", "status",
 })
+_LEXICAL_DICE_FLOOR = 0.30
+_TITLE_DICE_FLOOR = 0.80
 
 
 @dataclass(frozen=True)
@@ -39,6 +41,12 @@ class CandidateSet:
 
 def _words(text: str) -> set[str]:
     return {word.casefold() for word in _WORD.findall(text) if len(word) > 2 and word.casefold() not in _STOP}
+
+
+def _dice(left: set[str], right: set[str]) -> float:
+    if not left or not right:
+        return 0.0
+    return 2 * len(left & right) / (len(left) + len(right))
 
 
 def _ordered_words(text: str) -> list[str]:
@@ -116,24 +124,40 @@ def candidates_for_note(db_path: Path, note_id: str, k: int = 20) -> CandidateSe
         elif target.id == note_id:
             add(link_source.id, "incoming_link", 95.0)
 
-    source_words = _words(source.title)
+    source_title_words = _words(source.title)
+    source_words = _words(source.title + " " + source.content[:2_000])
+    lexical_evidence: dict[str, tuple[float, float]] = {}
     for note in notes:
         if note.id == note_id:
             continue
         if note.content_hash == source.content_hash:
             add(note.id, "same_content", 90.0)
-        target_words = _words(note.title)
-        if source_words and target_words:
-            intersection = source_words & target_words
-            if intersection:
-                dice = 2 * len(intersection) / (len(source_words) + len(target_words))
-                add(note.id, "title_overlap", 20.0 + dice * 20.0)
+        title_dice = _dice(source_title_words, _words(note.title))
+        lexical_dice = _dice(source_words, _words(note.title + " " + note.content[:2_000]))
+        lexical_evidence[note.id] = (title_dice, lexical_dice)
+        # A partial title collision is weak on its own (for example, the same
+        # project word attached to unrelated subjects). Admit lexical candidates
+        # only when the whole title is nearly identical or content corroborates
+        # it. Exact links and byte-identical content bypass this precision gate.
+        if title_dice >= _TITLE_DICE_FLOOR or lexical_dice >= _LEXICAL_DICE_FLOOR:
+            if title_dice > 0:
+                add(note.id, "title_overlap", 10.0 + title_dice * 10.0)
+            add(note.id, "lexical_overlap", 20.0 + lexical_dice * 40.0)
 
     # Search title and a bounded body prefix so differently named notes can
     # still meet in the local shortlist. The final pair cap remains k.
     query_terms = _ordered_words(source.title + " " + source.content[:2_000])[:16]
-    for hit in search(db_path, " ".join(query_terms), limit=max(30, k * 5)):
-        add(hit.id, "full_text", 10.0)
+    hits = [
+        hit for hit in search(db_path, " ".join(query_terms), limit=max(30, k * 5))
+        if hit.id != note_id
+    ]
+    best_score = max((hit.score for hit in hits), default=0.0)
+    for hit in hits:
+        title_dice, lexical_dice = lexical_evidence.get(hit.id, (0.0, 0.0))
+        if title_dice < _TITLE_DICE_FLOOR and lexical_dice < _LEXICAL_DICE_FLOOR:
+            continue
+        relative_score = hit.score / best_score if best_score > 0 else 0.0
+        add(hit.id, "full_text", 10.0 + relative_score * 30.0)
 
     ranked = sorted(
         (

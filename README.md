@@ -10,12 +10,30 @@ This is an MVP. The code is free; optional calls through Vercel AI Gateway use
 your own key and may incur charges. A key is not needed for indexing, search,
 or candidate previews.
 
-## Try it with fictional notes
+## Install
 
-Requires Python 3.11 or newer and a local checkout of this repository.
+The current pre-release is installable directly from GitHub. It is not on PyPI
+and does not have a release tag yet.
 
 ```sh
-python3 -m pip install .
+pipx install "git+https://github.com/fellowship-dev/jev-second-brain.git"
+secondbrain --version
+```
+
+Without `pipx`, install into your active Python environment:
+
+```sh
+python3 -m pip install "git+https://github.com/fellowship-dev/jev-second-brain.git"
+```
+
+## Try it with fictional notes
+
+The fictional vault is kept in the source repository, so clone it for this
+walkthrough. Requires Python 3.11 or newer.
+
+```sh
+git clone https://github.com/fellowship-dev/jev-second-brain.git
+cd jev-second-brain
 state_dir="$(mktemp -d)"
 secondbrain init examples/synthetic-vault --state "$state_dir" --json
 secondbrain index --state "$state_dir" --json
@@ -50,8 +68,10 @@ canary before the first uncached pair and requires evidence that the request
 used Vercel's zero data retention route to TypeSafe. If that evidence is absent,
 the private evaluation stops. Vercel currently makes per request ZDR available
 on Pro and Enterprise plans; check your account and the
-[provider policy](docs/PRIVACY.md) before a private pilot. We have not verified
-a live route in this repository.
+[provider policy](docs/PRIVACY.md) before a private pilot. A private-mode run
+against the fictional vault passed that gate; see the
+[live canary receipt](docs/LIVE-CANARY.md). That receipt does not authorize or
+validate a private-vault pilot.
 
 `suggest --evaluate` asks Jev to classify each shortlisted pair as duplicate,
 related, revises, contradicts, none, or unsure. It returns probabilities,
@@ -73,6 +93,12 @@ probabilities, and `answer_status`. On a provider error, it returns the local
 ranking with `mode: fallback` and an unassessed status. It does not compose an
 answer or claim that an unassessed hit supports one.
 
+Before either provider-backed command evaluates note text, it verifies the
+selected files against their indexed content hashes. If a file changed,
+disappeared, escaped the vault, or became a symlink after `index`, the command
+fails closed and asks you to rerun `secondbrain index`. It does not send stale
+indexed text to the provider.
+
 ## What is here
 
 - Local Markdown scanning, stable note IDs, explicit link extraction, SQLite
@@ -86,10 +112,12 @@ answer or claim that an unassessed hit supports one.
 The index holds full Markdown text locally. Model calls transmit only the
 selected note pair or query/excerpt, never the entire vault. See
 [privacy and data flow](docs/PRIVACY.md), [delivery phases](docs/MVP.md), and
-[MVP verification](docs/RECEIPT.md) for the checks run so far, plus
-`secondbrain --help` for current behavior. Clustering, automatic tagging,
-deduplication actions, source writeback, and a measured private vault pilot are
-later work.
+[MVP verification](docs/RECEIPT.md) for the checks run so far. The
+[live alignment benchmark](benchmarks/LIVE.md) records both the primary fixture
+and an independent holdout. Those fixtures are tiny, public, synthetic, and
+subject to live model variation. See `secondbrain --help` for current behavior.
+Clustering, automatic tagging, deduplication actions, source writeback, and a
+measured private vault pilot are later work.
 
 ## Development
 

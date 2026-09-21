@@ -18,12 +18,12 @@ cannot recover a true neighbor absent from the shortlist. The MVP exposes
 `eligible_count`, `pool_count`, `returned_count`, and `truncated_count` for
 that reason.
 
-| Phase | Deliverable | Verification |
+| Phase | Deliverable | Status and verification |
 | --- | --- | --- |
-| 0. Package and pattern | MIT Python package, CLI entry point, fictional vault, copied `link-new-material` skill and provenance check. | Install locally; CLI help and skill sync check pass. |
-| 1. Local corpus | Markdown scan, SQLite/FTS search, explicit links, stable IDs and a bounded candidate union. | Add, change, rename, remove and repeat scans against fictional notes; local search remains usable without a key. |
-| 2. Jev judgments | Typed Vercel evaluation adapter, privacy route canary, per run limits, revision keyed caches and directed proposals. | Mocked provider tests cover cache replay, no link, uncertainty, changed revisions, transport and policy failures. A live synthetic canary is still needed before claiming a working account route. |
-| 3. User journey | `init`, `index`, `search`, `suggest`, `review`, plus explicit `search --rerank`. | Install in a clean environment and run the fictional vault smoke path. Source files remain unchanged. Reranking without a provider falls back to local matches. |
+| 0. Package and pattern | MIT Python package, CLI entry point, fictional vault, copied `link-new-material` skill and provenance check. | **Delivered.** The GitHub install, CLI help, package build and skill sync check pass. |
+| 1. Local corpus | Markdown scan, SQLite/FTS search, explicit links, stable IDs and a bounded candidate union. | **Delivered.** Tests cover add, change, rename, removal and repeat scans. Local search works without a key. |
+| 2. Jev judgments | Typed Vercel evaluation adapter, privacy route canary, per run limits, revision keyed caches and directed proposals. | **Delivered for fictional data.** Mocked failure tests pass and a live private-mode fictional run verified ZDR evidence and exclusive TypeSafe routing. See [the live canary receipt](LIVE-CANARY.md). A private corpus has not been tested. |
+| 3. User journey | `init`, `index`, `search`, `suggest`, `review`, plus explicit `search --rerank`. | **Delivered.** Clean install and fictional end-to-end smoke pass. Source files remain unchanged. Provider failure falls back to local search. Provider-backed commands reject an index whose selected source hashes no longer match disk and ask the user to rerun `index`. |
 
 The code for these phases is present; verification receipts belong in the
 release process rather than being inferred from this table. `README.md` shows
@@ -47,10 +47,10 @@ private notes.
 
 | Phase | Deliverable | Done when |
 | --- | --- | --- |
-| 4. Synthetic release gate | Clean package install, cross platform CI, private route canary on fictional data, and a frozen small corpus evaluation set. | Source preserving end to end run is captured, including request count, cost, candidate recall, false links and abstentions. |
+| 4. Synthetic release gate | Clean package install, CI, private route canary on fictional data, and frozen evaluation sets. | **In progress.** Linux CI passed on Python 3.11/3.12; live fictional canaries, candidate recall, mocked rerank behavior, and primary plus holdout live alignment are recorded. The holdout improved from 10/12 to 12/12 exact and acceptable after rubric clarification. macOS 3.12 and Windows 3.12 jobs are configured but have not run. |
 | 5. Private pilot | Opt in 300 to 500 note sample with source permissions, baseline searches, human review time, and measured retrieval quality. | Owner has reviewed data handling and pilot scope; no automatic source edits; before/after metrics include misses and wrong links. |
 | 6. Broader second brain | Pre tags, buckets, clusters, duplicate review, cross links, portable adapters, and optional reviewed writeback. | Each action has an explainable preview, reversible provenance, a quality benchmark, and a documented authority boundary. |
-| 7. Public distribution | Publish a standalone GitHub repository and versioned package/skill, with contribution guidance and repeatable releases. | Owner approves publication after secret and private data audit; install and release artifacts match the tested commit. |
+| 7. Public distribution | Public standalone repository, versioned package/skill, contribution guidance and repeatable releases. | **In progress.** The repository and Git install are public. A tag, GitHub release, package-registry release and release automation remain. |
 
 Keep local recall, typed provider judgment, and human acceptance distinct in
 both design and measurement. The copied pattern skill is in

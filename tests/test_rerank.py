@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sqlite3
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 from jev_second_brain.index import scan_and_index
 from jev_second_brain.rerank import _validate_judgment, rerank_search
@@ -14,6 +16,7 @@ class FakeProvider:
         self.choice = choice
         self.failure_at = failure_at
         self.calls: list[tuple[object, object, bool]] = []
+        self.private_route_verified = True
 
     def evaluate(self, state, questions, *, private=True):
         self.calls.append((state, questions, private))
@@ -108,6 +111,34 @@ class RerankTest(unittest.TestCase):
                       provider=provider, cache_path=self.cache)
         self.assertEqual(len(provider.calls), 2)
 
+    def test_private_mode_rejects_provider_without_verified_route(self) -> None:
+        class UnverifiedProvider:
+            def __init__(self):
+                self.calls = 0
+
+            def evaluate(self, state, questions, *, private=True):
+                self.calls += 1
+                raise AssertionError("private text must not be sent")
+
+        provider = UnverifiedProvider()
+        result = rerank_search(
+            self.db, "telescope", k=1, evaluate=True, private=True,
+            provider=provider, cache_path=self.cache,
+        )
+        self.assertEqual(result.mode, "fallback")
+        self.assertEqual(result.error, "PolicyError")
+        self.assertEqual(provider.calls, 0)
+
+    def test_public_mode_accepts_provider_without_private_capability(self) -> None:
+        provider = FakeProvider()
+        del provider.private_route_verified
+        result = rerank_search(
+            self.db, "telescope", k=1, evaluate=True, private=False,
+            provider=provider, cache_path=self.cache,
+        )
+        self.assertEqual(result.mode, "jev")
+        self.assertEqual(len(provider.calls), 1)
+
     def test_nonfinite_probability_is_rejected(self) -> None:
         with self.assertRaises(ValueError):
             _validate_judgment({"type": "choice", "choice": "supports", "probabilities": {
@@ -134,6 +165,27 @@ class RerankTest(unittest.TestCase):
         self.assertEqual(len(result.hits), 3)
         self.assertTrue(all(hit.classification is None for hit in result.hits))
         self.assertEqual(len(provider.calls), 2)
+
+    def test_local_cache_fault_is_not_mislabeled_as_provider_fallback(self) -> None:
+        provider = FakeProvider()
+        with patch("jev_second_brain.rerank._open_cache", side_effect=sqlite3.OperationalError("disk fault")):
+            with self.assertRaises(sqlite3.OperationalError):
+                rerank_search(
+                    self.db, "telescope", k=1, evaluate=True,
+                    provider=provider, cache_path=self.cache,
+                )
+        self.assertEqual(provider.calls, [])
+
+    def test_changed_source_requires_reindex_before_rerank(self) -> None:
+        provider = FakeProvider()
+        (self.vault / "alpha.md").write_text("# Alpha\nChanged after indexing.\n", encoding="utf-8")
+
+        with self.assertRaisesRegex(ValueError, "run index and retry"):
+            rerank_search(
+                self.db, "telescope", k=1, evaluate=True,
+                provider=provider, cache_path=self.cache,
+            )
+        self.assertEqual(provider.calls, [])
 
 
 if __name__ == "__main__":

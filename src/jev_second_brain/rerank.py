@@ -17,7 +17,8 @@ import re
 import sqlite3
 from typing import Any
 
-from .index import Note, SearchHit, get_note, search
+from .index import Note, SearchHit, get_note, require_fresh_source, search
+from .policy import ensure_private_provider
 from .provider import MODEL, VercelJevProvider
 
 
@@ -190,31 +191,36 @@ def rerank_search(
     if not evaluate:
         return RerankResult(query, hits, "local", "unassessed", 0, 0)
 
+    for _, note in sourced:
+        require_fresh_source(vault_root, note)
+
     cache_path = Path(cache_path).resolve() if cache_path is not None else db_path.with_name("rerank.sqlite")
     if cache_path.is_relative_to(vault_root):
         raise ValueError("Put the rerank cache outside the vault")
     evaluated = cache_hits = 0
     judged: list[RerankHit] = []
-    try:
-        with closing(_open_cache(cache_path)) as cache:
-            for hit, note in sourced:
-                key = _cache_key(query, note.content_hash, private=private)
-                judgment = _read_cached(cache, key)
-                if judgment is None:
+    with closing(_open_cache(cache_path)) as cache:
+        for hit, note in sourced:
+            key = _cache_key(query, note.content_hash, private=private)
+            judgment = _read_cached(cache, key)
+            if judgment is None:
+                try:
                     if provider is None:
                         provider = VercelJevProvider()
-                    if private and isinstance(provider, VercelJevProvider) and not provider.private_route_verified:
-                        provider.verify_private_route()
+                    if private:
+                        ensure_private_provider(provider)
                     state = {"query": query[:MAX_QUERY_CHARS], "note_excerpt": _evidence_excerpt(note.content, query)}
                     response = provider.evaluate(state, _QUESTION, private=private)
                     judgment = _validate_judgment(response.answers["relevance"])
-                    _write_cached(cache, key, *judgment)
-                    evaluated += 1
-                else:
-                    cache_hits += 1
-                judged.append(_assessed(hit, judgment))
-    except Exception as exc:
-        return RerankResult(query, hits, "fallback", "unassessed", evaluated, cache_hits, type(exc).__name__)
+                except Exception as exc:
+                    return RerankResult(
+                        query, hits, "fallback", "unassessed", evaluated, cache_hits, type(exc).__name__
+                    )
+                _write_cached(cache, key, *judgment)
+                evaluated += 1
+            else:
+                cache_hits += 1
+            judged.append(_assessed(hit, judgment))
     judged.sort(key=lambda hit: (hit.relevance_score or 0, hit.local_score), reverse=True)
     status = "supported" if any(hit.supported for hit in judged) else "abstain"
     return RerankResult(query, tuple(judged), "jev", status, evaluated, cache_hits)

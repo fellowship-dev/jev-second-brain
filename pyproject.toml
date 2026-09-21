@@ -17,6 +17,12 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/fellowship-dev/jev-second-brain"
+Documentation = "https://github.com/fellowship-dev/jev-second-brain/tree/main/docs"
+Repository = "https://github.com/fellowship-dev/jev-second-brain.git"
+Issues = "https://github.com/fellowship-dev/jev-second-brain/issues"
+
 [project.scripts]
 secondbrain = "jev_second_brain.cli:main"
 

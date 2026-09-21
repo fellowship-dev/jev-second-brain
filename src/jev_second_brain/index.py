@@ -205,6 +205,21 @@ def get_note(db_path: Path, note_id: str) -> Note | None:
     return Note(**dict(row)) if row else None
 
 
+def require_fresh_source(vault: Path, note: Note) -> Path:
+    """Fail closed when an indexed note no longer matches its source file."""
+    vault = Path(vault).resolve()
+    source = vault / note.path
+    if source.is_symlink():
+        raise ValueError(f"Indexed source became a symlink; run index and retry: {note.path}")
+    resolved = source.resolve()
+    if not resolved.is_relative_to(vault) or not resolved.is_file():
+        raise ValueError(f"Indexed source is missing or escapes the vault; run index and retry: {note.path}")
+    content = resolved.read_text(encoding="utf-8")
+    if sha256(content.encode()).hexdigest() != note.content_hash:
+        raise ValueError(f"Indexed source changed; run index and retry: {note.path}")
+    return resolved
+
+
 def search(db_path: Path, query: str, limit: int = 20) -> list[SearchHit]:
     """Local full-text retrieval; returns source paths and snippets, no provider call."""
     if limit <= 0:
