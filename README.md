@@ -86,6 +86,7 @@ answer or claim that an unassessed hit supports one.
 The index holds full Markdown text locally. Model calls transmit only the
 selected note pair or query/excerpt, never the entire vault. See
 [privacy and data flow](docs/PRIVACY.md), [delivery phases](docs/MVP.md), and
+[MVP verification](docs/RECEIPT.md) for the checks run so far, plus
 `secondbrain --help` for current behavior. Clustering, automatic tagging,
 deduplication actions, source writeback, and a measured private vault pilot are
 later work.
