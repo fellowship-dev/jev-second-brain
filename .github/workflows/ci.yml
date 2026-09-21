@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install package
+        run: python -m pip install .
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Skill provenance
+        run: python scripts/check_skill_sync.py
+      - name: Installed CLI smoke
+        shell: bash
+        run: |
+          state_dir="$(mktemp -d)"
+          secondbrain init examples/synthetic-vault --state "$state_dir" --json
+          secondbrain index --state "$state_dir" --json
+          secondbrain search "Aurora onboarding" --state "$state_dir" --json
+          secondbrain suggest projects/aurora.md --state "$state_dir" --json
