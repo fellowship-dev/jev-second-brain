@@ -13,6 +13,12 @@ SPEC.loader.exec_module(check_skill_sync)
 
 
 class SkillSyncTest(unittest.TestCase):
+    def test_digest_is_stable_across_text_line_endings(self):
+        self.assertEqual(
+            check_skill_sync._digest_bytes(b"one\ntwo\n"),
+            check_skill_sync._digest_bytes(b"one\r\ntwo\r\n"),
+        )
+
     def test_hashes_detect_local_and_source_drift(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

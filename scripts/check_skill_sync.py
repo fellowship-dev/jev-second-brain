@@ -14,8 +14,13 @@ SKILL = ROOT / "skills" / "link-new-material" / "SKILL.md"
 PROVENANCE = ROOT / "skills" / "PROVENANCE.md"
 
 
+def _digest_bytes(content: bytes) -> str:
+    """Hash logical text consistently across LF and CRLF checkouts."""
+    return hashlib.sha256(content.replace(b"\r\n", b"\n")).hexdigest()
+
+
 def _digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return _digest_bytes(path.read_bytes())
 
 
 def _recorded_hash(provenance: str, label: str) -> str:
@@ -39,7 +44,7 @@ def check(
     if source is not None and source_bytes is not None:
         raise ValueError("provide one source, as a path or bytes")
     upstream_hash = _digest(source) if source is not None else (
-        hashlib.sha256(source_bytes).hexdigest() if source_bytes is not None else None
+        _digest_bytes(source_bytes) if source_bytes is not None else None
     )
     if upstream_hash is not None and upstream_hash != _recorded_hash(record, "Source"):
         findings.append("source changed: inspect upstream changes before syncing the copy")
