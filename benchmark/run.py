@@ -27,14 +27,14 @@ DEFAULT_TRUTH = BENCHMARK / "truth.json"
 
 
 def fixture_fingerprint(corpus: Path = DEFAULT_CORPUS, truth_path: Path = DEFAULT_TRUTH) -> str:
-    """Hash relative paths and bytes so benchmark revisions are visible."""
+    """Hash paths and LF-normalized bytes so checkout revisions are visible."""
     digest = sha256()
     inputs = [truth_path, *sorted(corpus.rglob("*.md"))]
     for path in inputs:
         relative = path.relative_to(BENCHMARK).as_posix() if path.is_relative_to(BENCHMARK) else path.name
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")
-        digest.update(path.read_bytes())
+        digest.update(path.read_bytes().replace(b"\r\n", b"\n"))
         digest.update(b"\0")
     return digest.hexdigest()
 

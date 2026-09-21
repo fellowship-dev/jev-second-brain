@@ -82,7 +82,8 @@ def _write_case(root: Path, case: dict[str, Any]) -> tuple[Path, Path, dict[str,
 
 
 def run_benchmark(fixture_path: Path = FIXTURE) -> BenchmarkReport:
-    fixture_bytes = Path(fixture_path).read_bytes()
+    # Keep the frozen fixture identity stable when Git checks text out as CRLF.
+    fixture_bytes = Path(fixture_path).read_bytes().replace(b"\r\n", b"\n")
     fixture = json.loads(fixture_bytes)
     if fixture.get("schema") != 1 or not fixture.get("ranking_cases"):
         raise ValueError("rerank fixture must use schema 1 with ranking cases")

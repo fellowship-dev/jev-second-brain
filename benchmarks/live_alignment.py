@@ -29,7 +29,9 @@ LABELS = ("duplicate", "related", "revises", "contradicts", "none", "unsure")
 
 
 def load_fixture(path: Path = FIXTURE) -> tuple[dict[str, Any], str]:
-    raw = Path(path).read_bytes()
+    # Git may materialize text with CRLF on Windows. Fingerprint logical fixture
+    # content rather than the checkout's newline convention.
+    raw = Path(path).read_bytes().replace(b"\r\n", b"\n")
     fixture = json.loads(raw)
     if fixture.get("schema") != 1 or not isinstance(fixture.get("cases"), list) or not fixture["cases"]:
         raise ValueError("alignment fixture must use schema 1 with nonempty cases")
