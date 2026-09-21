@@ -1,4 +1,3 @@
-import hashlib
 import importlib.util
 import tempfile
 import unittest
@@ -27,7 +26,7 @@ class SkillSyncTest(unittest.TestCase):
             provenance = root / "PROVENANCE.md"
             skill.write_text("adapted\n")
             source.write_text("original\n")
-            digest = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+            digest = lambda path: check_skill_sync._digest_bytes(path.read_bytes())
             provenance.write_text(
                 f"- Source SHA-256: `{digest(source)}`\n"
                 f"- Copy SHA-256: `{digest(skill)}`\n"
